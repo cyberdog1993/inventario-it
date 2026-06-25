@@ -10,8 +10,8 @@
 #      crontab -e  →  0 * * * * /opt/scripts/agent-linux.sh
 # ============================================================
 
-API_KEY="inv_REEMPLAZA_CON_TU_API_KEY"
-SERVER_URL="https://inventario.consultores-it.com/api/report"
+API_KEY="inv_75a38dd87e1e496f9a381c0e4a5dd89d"
+SERVER_URL="https://inventario-it-self.vercel.app/api/report"
 
 # Detect OS
 if [[ "$OSTYPE" == "darwin"* ]]; then

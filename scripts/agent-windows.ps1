@@ -10,8 +10,8 @@
 #   schtasks /create /tn "InventarioIT" /tr "powershell -File C:\Scripts\agent-windows.ps1" /sc hourly /ru SYSTEM
 # ============================================================
 
-$API_KEY    = "inv_REEMPLAZA_CON_TU_API_KEY"
-$SERVER_URL = "https://inventario.consultores-it.com/api/report"
+$API_KEY    = "inv_75a38dd87e1e496f9a381c0e4a5dd89d"
+$SERVER_URL = "https://inventario-it-self.vercel.app/api/report"
 
 # --- Recopilación de datos ---
 $hostname   = $env:COMPUTERNAME
