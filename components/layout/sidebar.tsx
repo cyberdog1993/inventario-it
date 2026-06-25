@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   Monitor, LayoutDashboard, List, PlusCircle,
-  Upload, Key, LogOut, Building2
+  Upload, Key, LogOut, Building2, Terminal
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/inventory/new', label: 'Agregar Equipo', icon: PlusCircle },
   { href: '/import', label: 'Importar Excel', icon: Upload },
   { href: '/sites', label: 'Ubicaciones', icon: Building2 },
+  { href: '/agents', label: 'Agentes', icon: Terminal },
   { href: '/api-keys', label: 'API Keys', icon: Key },
 ]
 
