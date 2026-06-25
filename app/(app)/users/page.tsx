@@ -1,18 +1,15 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { getUserRole } from '@/lib/roles-server'
-import { redirect } from 'next/navigation'
 import { UsersManager } from '@/components/inventory/users-manager'
 
 export default async function UsersPage() {
-  const role = await getUserRole()
-  if (role !== 'admin') redirect('/dashboard')
-
   const supabase = createAdminClient()
 
-  // Get all users with their roles
-  const { data: { users } } = await supabase.auth.admin.listUsers()
-  const { data: roles } = await supabase.from('user_roles').select('user_id, role')
+  const [{ data: listData }, { data: roles }] = await Promise.all([
+    supabase.auth.admin.listUsers(),
+    supabase.from('user_roles').select('user_id, role'),
+  ])
 
+  const users = listData?.users ?? []
   const roleMap = Object.fromEntries((roles ?? []).map((r) => [r.user_id, r.role]))
 
   const usersWithRoles = users.map((u) => ({
