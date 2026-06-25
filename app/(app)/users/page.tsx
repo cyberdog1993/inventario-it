@@ -1,5 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
-import { getUserRole } from '@/lib/roles'
+import { getUserRole } from '@/lib/roles-server'
 import { redirect } from 'next/navigation'
 import { UsersManager } from '@/components/inventory/users-manager'
 

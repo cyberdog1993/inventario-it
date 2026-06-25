@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteDeviceButton } from '@/components/inventory/delete-device-button'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { getUserRole, canWrite, isAdmin } from '@/lib/roles'
+import { getUserRole } from '@/lib/roles-server'
+import { canWrite, isAdmin } from '@/lib/roles'
 
 export default async function DeviceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

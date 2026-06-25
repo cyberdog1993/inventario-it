@@ -1,6 +1,6 @@
 import { Sidebar } from '@/components/layout/sidebar'
 import { Footer } from '@/components/layout/footer'
-import { getUserRole } from '@/lib/roles'
+import { getUserRole } from '@/lib/roles-server'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const role = await getUserRole()
