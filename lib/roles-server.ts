@@ -9,7 +9,7 @@ export async function getUserRole(): Promise<UserRole> {
   if (!user) return 'client'
 
   // Use admin client to bypass RLS when reading user's own role
-  const admin = await createAdminClient()
+  const admin = createAdminClient()
   const { data } = await admin
     .from('user_roles')
     .select('role')

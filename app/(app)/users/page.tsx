@@ -7,7 +7,7 @@ export default async function UsersPage() {
   const role = await getUserRole()
   if (role !== 'admin') redirect('/dashboard')
 
-  const supabase = await createAdminClient()
+  const supabase = createAdminClient()
 
   // Get all users with their roles
   const { data: { users } } = await supabase.auth.admin.listUsers()
