@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
@@ -24,10 +25,19 @@ const allNavItems = [
   { href: '/users',         label: 'Usuarios',      icon: Users,           roles: ['admin'] },
 ]
 
-export function Sidebar({ role }: { role: UserRole }) {
+export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+  const [role, setRole] = useState<UserRole>('client')
+
+  useEffect(() => {
+    async function fetchRole() {
+      const { data } = await supabase.rpc('get_my_role')
+      if (data) setRole(data as UserRole)
+    }
+    fetchRole()
+  }, [])
 
   const navItems = allNavItems.filter((item) => item.roles.includes(role))
 
