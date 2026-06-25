@@ -36,11 +36,8 @@ export function Sidebar() {
   return (
     <aside className="w-64 bg-gray-900 text-white flex flex-col min-h-screen">
       <div className="p-5 border-b border-gray-700 flex flex-col items-center gap-2">
-        <Image src="/logo.svg" alt="Consultores-IT" width={80} height={80} className="invert" />
-        <div className="text-center">
-          <p className="font-semibold text-sm tracking-wide">CONSULTORES<span className="text-orange-400">IT</span></p>
-          <p className="text-xs text-gray-400 tracking-widest">i n v e n t a r i o</p>
-        </div>
+        <Image src="/logo-blanco.png" alt="Consultores-IT" width={160} height={27} priority />
+        <p className="text-xs text-gray-400 tracking-widest">i n v e n t a r i o</p>
       </div>
       <nav className="flex-1 p-4 space-y-1">
         {navItems.map(({ href, label, icon: Icon }) => (

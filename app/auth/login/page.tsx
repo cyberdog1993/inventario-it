@@ -35,13 +35,10 @@ export default function LoginPage() {
     <div className="flex-1 flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-3">
-            <Image src="/logo.svg" alt="Consultores-IT" width={100} height={100} />
+          <div className="flex justify-center mb-4">
+            <Image src="/logo-negro.png" alt="Consultores-IT" width={220} height={37} priority />
           </div>
-          <p className="text-xl font-semibold tracking-wide text-gray-800">
-            CONSULTORES<span className="text-orange-500">IT</span>
-          </p>
-          <CardTitle className="text-lg font-medium text-gray-600 mt-1">Inventario IT</CardTitle>
+          <CardTitle className="text-lg font-medium text-gray-700">Inventario IT</CardTitle>
           <CardDescription>Acceso al sistema</CardDescription>
         </CardHeader>
         <CardContent>
