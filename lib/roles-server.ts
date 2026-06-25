@@ -1,8 +1,10 @@
 // Server-only — uses next/headers via supabase server client
+import { unstable_noStore as noStore } from 'next/cache'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type { UserRole } from '@/lib/roles'
 
 export async function getUserRole(): Promise<UserRole> {
+  noStore()
   // Use regular client to get authenticated user
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

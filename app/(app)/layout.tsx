@@ -1,8 +1,10 @@
+import { unstable_noStore as noStore } from 'next/cache'
 import { Sidebar } from '@/components/layout/sidebar'
 import { Footer } from '@/components/layout/footer'
 import { getUserRole } from '@/lib/roles-server'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  noStore()
   const role = await getUserRole()
 
   return (
