@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { PlusCircle, Copy, Trash2, Key } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import crypto from 'crypto'
 
 interface ApiKey { id: string; name: string; active: boolean; created_at: string }
 
@@ -26,7 +25,7 @@ export function ApiKeysManager({ keys: initial }: { keys: ApiKey[] }) {
     if (!name.trim()) return
     setLoading(true)
 
-    const rawKey = `inv_${crypto.randomUUID().replace(/-/g, '')}`
+    const rawKey = `inv_${globalThis.crypto.randomUUID().replace(/-/g, '')}`
     const keyHash = await sha256(rawKey)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -112,7 +111,7 @@ export function ApiKeysManager({ keys: initial }: { keys: ApiKey[] }) {
 
 async function sha256(text: string): Promise<string> {
   const msgBuffer = new TextEncoder().encode(text)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
+  const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', msgBuffer)
   const hashArray = Array.from(new Uint8Array(hashBuffer))
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
