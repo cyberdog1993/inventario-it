@@ -3,15 +3,17 @@ import { notFound } from 'next/navigation'
 import { DEVICE_TYPE_LABELS, DEVICE_STATUS_LABELS, DeviceType, DeviceStatus } from '@/types'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react'
+import { ArrowLeft, Edit } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DeleteDeviceButton } from '@/components/inventory/delete-device-button'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { getUserRole, canWrite, isAdmin } from '@/lib/roles'
 
 export default async function DeviceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
+  const role = await getUserRole()
   const { data: device } = await supabase
     .from('devices')
     .select('*, sites(name)')
@@ -51,10 +53,12 @@ export default async function DeviceDetailPage({ params }: { params: Promise<{ i
           </div>
         </div>
         <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/inventory/${id}/edit`}><Edit className="h-4 w-4 mr-2" />Editar</Link>
-          </Button>
-          <DeleteDeviceButton id={id} />
+          {canWrite(role) && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/inventory/${id}/edit`}><Edit className="h-4 w-4 mr-2" />Editar</Link>
+            </Button>
+          )}
+          {isAdmin(role) && <DeleteDeviceButton id={id} />}
         </div>
       </div>
 

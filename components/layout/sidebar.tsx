@@ -6,25 +6,30 @@ import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, List, PlusCircle,
-  Upload, Key, LogOut, Building2, Terminal
+  Upload, Key, LogOut, Building2, Terminal, Users
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import type { UserRole } from '@/lib/roles'
+import { ROLE_LABELS, ROLE_COLORS } from '@/lib/roles'
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/inventory', label: 'Inventario', icon: List },
-  { href: '/inventory/new', label: 'Agregar Equipo', icon: PlusCircle },
-  { href: '/import', label: 'Importar Excel', icon: Upload },
-  { href: '/sites', label: 'Ubicaciones', icon: Building2 },
-  { href: '/agents', label: 'Agentes', icon: Terminal },
-  { href: '/api-keys', label: 'API Keys', icon: Key },
+const allNavItems = [
+  { href: '/dashboard',     label: 'Dashboard',     icon: LayoutDashboard, roles: ['admin','operator','client'] },
+  { href: '/inventory',     label: 'Inventario',    icon: List,            roles: ['admin','operator','client'] },
+  { href: '/inventory/new', label: 'Agregar Equipo',icon: PlusCircle,      roles: ['admin','operator'] },
+  { href: '/import',        label: 'Importar Excel',icon: Upload,          roles: ['admin','operator'] },
+  { href: '/sites',         label: 'Ubicaciones',   icon: Building2,       roles: ['admin','operator'] },
+  { href: '/agents',        label: 'Agentes',       icon: Terminal,        roles: ['admin','operator'] },
+  { href: '/api-keys',      label: 'API Keys',      icon: Key,             roles: ['admin'] },
+  { href: '/users',         label: 'Usuarios',      icon: Users,           roles: ['admin'] },
 ]
 
-export function Sidebar() {
+export function Sidebar({ role }: { role: UserRole }) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
+
+  const navItems = allNavItems.filter((item) => item.roles.includes(role))
 
   async function handleLogout() {
     await supabase.auth.signOut()
@@ -47,7 +52,7 @@ export function Sidebar() {
             className={cn(
               'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
               pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
-                ? 'bg-blue-600 text-white'
+                ? 'bg-orange-600 text-white'
                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             )}
           >
@@ -56,7 +61,12 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 space-y-3">
+        <div className="px-3">
+          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ROLE_COLORS[role]}`}>
+            {ROLE_LABELS[role]}
+          </span>
+        </div>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white w-full transition-colors"
