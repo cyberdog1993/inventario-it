@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Monitor } from 'lucide-react'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -31,16 +31,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="flex-1 flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-2">
-            <div className="bg-blue-600 p-3 rounded-xl">
-              <Monitor className="h-8 w-8 text-white" />
-            </div>
+          <div className="flex justify-center mb-3">
+            <Image src="/logo.svg" alt="Consultores-IT" width={100} height={100} />
           </div>
-          <CardTitle className="text-2xl">Inventario IT</CardTitle>
-          <CardDescription>Consultores-IT — Acceso al sistema</CardDescription>
+          <p className="text-xl font-semibold tracking-wide text-gray-800">
+            CONSULTORES<span className="text-orange-500">IT</span>
+          </p>
+          <CardTitle className="text-lg font-medium text-gray-600 mt-1">Inventario IT</CardTitle>
+          <CardDescription>Acceso al sistema</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -71,6 +73,13 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+    </div>
+    <footer className="py-3 text-center text-xs text-gray-400 border-t bg-white">
+      Sistema de inventario automatizado — v1.0.0 &nbsp;·&nbsp;{' '}
+      <a href="mailto:desarrollos@consultores-it.com" className="hover:text-gray-600">
+        desarrollos@consultores-it.com
+      </a>
+    </footer>
     </div>
   )
 }

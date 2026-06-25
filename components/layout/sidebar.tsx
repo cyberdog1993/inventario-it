@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  Monitor, LayoutDashboard, List, PlusCircle,
+  LayoutDashboard, List, PlusCircle,
   Upload, Key, LogOut, Building2, Terminal
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -34,13 +35,11 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 bg-gray-900 text-white flex flex-col min-h-screen">
-      <div className="p-6 flex items-center gap-3 border-b border-gray-700">
-        <div className="bg-blue-600 p-2 rounded-lg">
-          <Monitor className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="font-semibold text-sm">Inventario IT</p>
-          <p className="text-xs text-gray-400">Consultores-IT</p>
+      <div className="p-5 border-b border-gray-700 flex flex-col items-center gap-2">
+        <Image src="/logo.svg" alt="Consultores-IT" width={80} height={80} className="invert" />
+        <div className="text-center">
+          <p className="font-semibold text-sm tracking-wide">CONSULTORES<span className="text-orange-400">IT</span></p>
+          <p className="text-xs text-gray-400 tracking-widest">i n v e n t a r i o</p>
         </div>
       </div>
       <nav className="flex-1 p-4 space-y-1">
