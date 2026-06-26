@@ -1,7 +1,11 @@
+import { unstable_noStore as noStore } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { UsersManager } from '@/components/inventory/users-manager'
 
+export const dynamic = 'force-dynamic'
+
 export default async function UsersPage() {
+  noStore()
   const supabase = createAdminClient()
 
   const [{ data: listData }, { data: roles }] = await Promise.all([
