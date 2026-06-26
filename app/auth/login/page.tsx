@@ -72,7 +72,7 @@ export default function LoginPage() {
       </Card>
     </div>
     <footer className="py-3 text-center text-xs text-gray-400 border-t bg-white">
-      Sistema de inventario automatizado — v1.2.4 &nbsp;·&nbsp;{' '}
+      Sistema de inventario automatizado — v1.2.5 &nbsp;·&nbsp;{' '}
       <a href="mailto:desarrollos@consultores-it.com" className="hover:text-gray-600">
         desarrollos@consultores-it.com
       </a>

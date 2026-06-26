@@ -79,14 +79,22 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
   }
 
-  const { userId, role } = await req.json()
-  if (!userId || !role) return NextResponse.json({ error: 'userId y role requeridos' }, { status: 400 })
+  const { userId, role, password } = await req.json()
+  if (!userId) return NextResponse.json({ error: 'userId requerido' }, { status: 400 })
 
   const admin = createAdminClient()
-  await admin.from('user_roles').upsert(
-    { user_id: userId, role, assigned_at: new Date().toISOString() },
-    { onConflict: 'user_id' }
-  )
+
+  if (password) {
+    const { error } = await admin.auth.admin.updateUserById(userId, { password })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  if (role) {
+    await admin.from('user_roles').upsert(
+      { user_id: userId, role, assigned_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    )
+  }
 
   return NextResponse.json({ ok: true })
 }
