@@ -43,7 +43,11 @@ export async function POST(req: NextRequest) {
   })
 
   if (error || !user) {
-    return NextResponse.json({ error: error?.message ?? 'Error al crear usuario' }, { status: 500 })
+    return NextResponse.json({
+      error: error?.message ?? 'Error al crear usuario',
+      code: (error as { code?: string } | null)?.code ?? null,
+      status: (error as { status?: number } | null)?.status ?? null,
+    }, { status: 500 })
   }
 
   await admin.from('user_roles').insert({ user_id: user.id, role: role ?? 'client' })
