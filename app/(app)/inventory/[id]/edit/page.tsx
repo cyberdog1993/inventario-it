@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
+import { getUserRole } from '@/lib/roles-server'
+import { canWrite } from '@/lib/roles'
+import { notFound, redirect } from 'next/navigation'
 import { DeviceForm } from '@/components/inventory/device-form'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -7,6 +9,8 @@ import { ArrowLeft } from 'lucide-react'
 
 export default async function EditDevicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const role = await getUserRole()
+  if (!canWrite(role)) redirect(`/inventory/${id}`)
   const supabase = await createClient()
   const [{ data: device }, { data: sites }] = await Promise.all([
     supabase.from('devices').select('*').eq('id', id).single(),

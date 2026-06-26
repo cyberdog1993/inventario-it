@@ -1,10 +1,15 @@
+import { redirect } from 'next/navigation'
+import { getUserRole } from '@/lib/roles-server'
+import { canWrite } from '@/lib/roles'
 import { ImportExcelForm } from '@/components/inventory/import-excel-form'
 import { Button } from '@/components/ui/button'
 import { Download, Info } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
 
-export default function ImportPage() {
+export default async function ImportPage() {
+  const role = await getUserRole()
+  if (!canWrite(role)) redirect('/inventory')
   return (
     <div className="p-8 max-w-3xl space-y-6">
       <div>

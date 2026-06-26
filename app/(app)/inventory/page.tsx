@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { getUserRole } from '@/lib/roles-server'
+import { canWrite } from '@/lib/roles'
 import { DEVICE_TYPE_LABELS, DEVICE_STATUS_LABELS, DeviceType, DeviceStatus } from '@/types'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +25,8 @@ const STATUS_COLORS: Record<DeviceStatus, string> = {
 
 export default async function InventoryPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams
-  const supabase = await createClient()
+  const [supabase, role] = await Promise.all([createClient(), getUserRole()])
+  const writer = canWrite(role)
 
   let query = supabase
     .from('devices')
@@ -47,14 +50,16 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
           <h1 className="text-2xl font-bold text-gray-900">Inventario</h1>
           <p className="text-gray-500 text-sm mt-1">{devices?.length ?? 0} equipos encontrados</p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/import"><Upload className="h-4 w-4 mr-2" />Importar</Link>
-          </Button>
-          <Button asChild size="sm">
-            <Link href="/inventory/new"><PlusCircle className="h-4 w-4 mr-2" />Agregar</Link>
-          </Button>
-        </div>
+        {writer && (
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link href="/import"><Upload className="h-4 w-4 mr-2" />Importar</Link>
+            </Button>
+            <Button asChild size="sm">
+              <Link href="/inventory/new"><PlusCircle className="h-4 w-4 mr-2" />Agregar</Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       <InventoryFilters sites={sites ?? []} />
@@ -76,7 +81,9 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
             {devices?.length === 0 && (
               <tr>
                 <td colSpan={7} className="text-center py-12 text-gray-400">
-                  No hay equipos. <Link href="/inventory/new" className="text-blue-600 hover:underline">Agregar el primero</Link>
+                  {writer
+                    ? <>No hay equipos. <Link href="/inventory/new" className="text-blue-600 hover:underline">Agregar el primero</Link></>
+                    : 'No hay equipos registrados.'}
                 </td>
               </tr>
             )}

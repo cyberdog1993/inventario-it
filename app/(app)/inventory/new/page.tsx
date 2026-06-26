@@ -1,7 +1,12 @@
+import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getUserRole } from '@/lib/roles-server'
+import { canWrite } from '@/lib/roles'
 import { DeviceForm } from '@/components/inventory/device-form'
 
 export default async function NewDevicePage() {
+  const role = await getUserRole()
+  if (!canWrite(role)) redirect('/inventory')
   const supabase = await createClient()
   const { data: sites } = await supabase.from('sites').select('id, name').order('name')
 
