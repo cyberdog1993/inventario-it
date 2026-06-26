@@ -1,27 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 
-// Verifica admin usando el JWT del header Authorization con RPC SECURITY DEFINER
-async function requireAdmin(req: NextRequest) {
+// Verifica admin: primero por cookies (mismo origen), fallback a JWT header
+async function requireAdmin(req: NextRequest): Promise<boolean> {
+  // Intento 1: sesión por cookies (peticiones same-origin)
+  try {
+    const supabase = await createClient()
+    const { data: role } = await supabase.rpc('get_my_role')
+    if (role === 'admin') return true
+  } catch {}
+
+  // Intento 2: JWT en Authorization header
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
-  if (!token) return null
+  if (token) {
+    const { createClient: createSBClient } = await import('@supabase/supabase-js')
+    const userClient = createSBClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } }
+    )
+    const { data: role } = await userClient.rpc('get_my_role')
+    if (role === 'admin') return true
+  }
 
-  // Anon client con JWT del usuario — PostgREST lo usa para auth.uid()
-  const userClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } }
-  )
-
-  const { data: role } = await userClient.rpc('get_my_role')
-  return role === 'admin' ? token : null
+  return false
 }
 
 // POST /api/users — create user
 export async function POST(req: NextRequest) {
-  const caller = await requireAdmin(req)
-  if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  }
 
   const { email, password, role } = await req.json()
   if (!email || !password) return NextResponse.json({ error: 'Email y contraseña requeridos' }, { status: 400 })
@@ -33,7 +42,9 @@ export async function POST(req: NextRequest) {
     email_confirm: true,
   })
 
-  if (error || !user) return NextResponse.json({ error: error?.message ?? 'Error al crear usuario' }, { status: 500 })
+  if (error || !user) {
+    return NextResponse.json({ error: error?.message ?? 'Error al crear usuario' }, { status: 500 })
+  }
 
   await admin.from('user_roles').insert({ user_id: user.id, role: role ?? 'client' })
 
@@ -42,12 +53,12 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/users — delete user
 export async function DELETE(req: NextRequest) {
-  const caller = await requireAdmin(req)
-  if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  }
 
   const { userId } = await req.json()
   if (!userId) return NextResponse.json({ error: 'userId requerido' }, { status: 400 })
-  // Note: self-delete check skipped — admin client would need a separate lookup
 
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.deleteUser(userId)
@@ -60,14 +71,18 @@ export async function DELETE(req: NextRequest) {
 
 // PATCH /api/users — update role
 export async function PATCH(req: NextRequest) {
-  const caller = await requireAdmin(req)
-  if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  if (!(await requireAdmin(req))) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
+  }
 
   const { userId, role } = await req.json()
   if (!userId || !role) return NextResponse.json({ error: 'userId y role requeridos' }, { status: 400 })
 
   const admin = createAdminClient()
-  await admin.from('user_roles').upsert({ user_id: userId, role, assigned_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  await admin.from('user_roles').upsert(
+    { user_id: userId, role, assigned_at: new Date().toISOString() },
+    { onConflict: 'user_id' }
+  )
 
   return NextResponse.json({ ok: true })
 }
