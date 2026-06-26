@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { ROLE_LABELS, ROLE_COLORS, type UserRole } from '@/lib/roles'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
@@ -29,13 +30,22 @@ export function UsersManager({ users: initial }: { users: User[] }) {
   const [loading, setLoading] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const router = useRouter()
+  const supabase = createClient()
+
+  async function authHeaders() {
+    const { data: { session } } = await supabase.auth.getSession()
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session?.access_token ?? ''}`,
+    }
+  }
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     const res = await fetch('/api/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({ email, password, role: newRole }),
     })
     const data = await res.json()
@@ -57,7 +67,7 @@ export function UsersManager({ users: initial }: { users: User[] }) {
     if (!role) return
     const res = await fetch('/api/users', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({ userId, role }),
     })
     if (!res.ok) { toast.error('Error al cambiar rol'); return }
@@ -68,7 +78,7 @@ export function UsersManager({ users: initial }: { users: User[] }) {
   async function handleDelete(userId: string) {
     const res = await fetch('/api/users', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({ userId }),
     })
     const data = await res.json()

@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
-import { createClient } from '@/lib/supabase/server'
 
-async function requireAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+// Verifica admin usando el JWT del header Authorization (enviado por el cliente)
+async function requireAdmin(req: NextRequest) {
+  const token = req.headers.get('Authorization')?.replace('Bearer ', '')
+  if (!token) return null
   const admin = createAdminClient()
+  const { data: { user }, error } = await admin.auth.getUser(token)
+  if (error || !user) return null
   const { data } = await admin.from('user_roles').select('role').eq('user_id', user.id).single()
   return data?.role === 'admin' ? user : null
 }
 
 // POST /api/users — create user
 export async function POST(req: NextRequest) {
-  const caller = await requireAdmin()
+  const caller = await requireAdmin(req)
   if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const { email, password, role } = await req.json()
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE /api/users — delete user
 export async function DELETE(req: NextRequest) {
-  const caller = await requireAdmin()
+  const caller = await requireAdmin(req)
   if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const { userId } = await req.json()
@@ -53,7 +54,7 @@ export async function DELETE(req: NextRequest) {
 
 // PATCH /api/users — update role
 export async function PATCH(req: NextRequest) {
-  const caller = await requireAdmin()
+  const caller = await requireAdmin(req)
   if (!caller) return NextResponse.json({ error: 'No autorizado' }, { status: 403 })
 
   const { userId, role } = await req.json()
