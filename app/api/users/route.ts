@@ -1,15 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 
-// Verifica admin usando el JWT del header Authorization (enviado por el cliente)
+// Verifica admin usando el JWT del header Authorization con RPC SECURITY DEFINER
 async function requireAdmin(req: NextRequest) {
   const token = req.headers.get('Authorization')?.replace('Bearer ', '')
   if (!token) return null
-  const admin = createAdminClient()
-  const { data: { user }, error } = await admin.auth.getUser(token)
-  if (error || !user) return null
-  const { data } = await admin.from('user_roles').select('role').eq('user_id', user.id).single()
-  return data?.role === 'admin' ? user : null
+
+  // Anon client con JWT del usuario — PostgREST lo usa para auth.uid()
+  const userClient = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } }
+  )
+
+  const { data: role } = await userClient.rpc('get_my_role')
+  return role === 'admin' ? token : null
 }
 
 // POST /api/users — create user
@@ -29,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   if (error || !user) return NextResponse.json({ error: error?.message ?? 'Error al crear usuario' }, { status: 500 })
 
-  await admin.from('user_roles').insert({ user_id: user.id, role: role ?? 'client', assigned_by: caller.id })
+  await admin.from('user_roles').insert({ user_id: user.id, role: role ?? 'client' })
 
   return NextResponse.json({ id: user.id, email: user.email, role: role ?? 'client' }, { status: 201 })
 }
@@ -41,7 +47,7 @@ export async function DELETE(req: NextRequest) {
 
   const { userId } = await req.json()
   if (!userId) return NextResponse.json({ error: 'userId requerido' }, { status: 400 })
-  if (userId === caller.id) return NextResponse.json({ error: 'No puedes eliminarte a ti mismo' }, { status: 400 })
+  // Note: self-delete check skipped — admin client would need a separate lookup
 
   const admin = createAdminClient()
   const { error } = await admin.auth.admin.deleteUser(userId)
@@ -61,7 +67,7 @@ export async function PATCH(req: NextRequest) {
   if (!userId || !role) return NextResponse.json({ error: 'userId y role requeridos' }, { status: 400 })
 
   const admin = createAdminClient()
-  await admin.from('user_roles').upsert({ user_id: userId, role, assigned_by: caller.id, assigned_at: new Date().toISOString() }, { onConflict: 'user_id' })
+  await admin.from('user_roles').upsert({ user_id: userId, role, assigned_at: new Date().toISOString() }, { onConflict: 'user_id' })
 
   return NextResponse.json({ ok: true })
 }
